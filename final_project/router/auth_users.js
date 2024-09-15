@@ -53,31 +53,47 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  let currUser = req.session.username;
+  let currUser = req.session.authorization.username;
   let book = books[req.params.isbn];
   if(book){
     let reviews =  book["reviews"];
     for (const [user, review] of Object.entries(reviews)) {
       if(user === currUser){
-        reviews[user] = {
-          "review": req.body.review
-        }
+        reviews[currUser] = req.body.review;
         book["reviews"] = reviews;
         books[req.params.isbn] = book;
 
         res.send("Updated:\n " + JSON.stringify(book, null, 4));
       }
-
-      book["reviews"][currUser] = req.body.review;
-      books[req.params.isbn] = book;
-      res.send("Added review: \n"+ JSON.stringify(book, null, 4));
     }
+    book["reviews"][currUser] = req.body.review;
+    books[req.params.isbn] = book;
+    res.send("Added review: \n"+ JSON.stringify(book, null, 4));
 
   }else{
     res.send("Unable to find book with ISBN: " + req.params.isbn);
   }
 
 });
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  let currUser = req.session.authorization.username;
+  let book = books[req.params.isbn];
+  console.log(currUser);
+  if(book){
+    let reviews =  book["reviews"];
+    for (const [user, review] of Object.entries(reviews)) {
+      if(user === currUser){
+        delete reviews[currUser];
+        console.log(books);
+        res.send("Deleted review for ISBN: " + req.params.isbn);
+      }
+    }
+    res.send("Unable to find review with ISBN: " + req.params.isbn);
+
+  }
+  res.send("Unable to find book with ISBN: " + req.params.isbn);
+
+})
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
