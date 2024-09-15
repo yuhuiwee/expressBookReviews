@@ -80,7 +80,7 @@ public_users.get('/title/:title',function (req, res) {
         return book;
       }
     }
-    return "Title: \"" + req.params.title + "\" not found";
+    return `Title: '` + req.params.title + `' not found`;
   });
 });
 
